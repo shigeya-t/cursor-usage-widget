@@ -3,6 +3,12 @@ options:
   bundleIdPrefix: jp.shigeya
   deploymentTarget:
     macOS: "14.0"
+  # Base.lproj を日本語として扱う。英語名は en.lproj の InfoPlist.strings で出す。
+  developmentLanguage: ja
+  knownRegions:
+    - Base
+    - en
+    - ja
 configFiles:
   Debug: Config/Team.xcconfig
   Release: Config/Team.xcconfig
@@ -24,10 +30,13 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        # ウィジェットギャラリーのアプリ一覧は .app のファイル名を見る。
-        # 濁点を含まないので NFC/NFD の食い違いが起きない。
+        # Finder がローカライズ名を出す条件: ファイル名と未ローカライズの
+        # CFBundleDisplayName が一致すること。英語名は en.lproj 側。
+        # ウィジェットギャラリーの見出しは .app 名を使うことがあるので、
+        # ファイル名自体は濁点なし日本語のままにする。
         CFBundleName: Cursor使用量
         CFBundleDisplayName: Cursor使用量
+        LSHasLocalizedDisplayName: true
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSUIElement: true
@@ -80,6 +89,7 @@ targets:
       properties:
         CFBundleName: Cursor使用量
         CFBundleDisplayName: Cursor使用量
+        LSHasLocalizedDisplayName: true
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:

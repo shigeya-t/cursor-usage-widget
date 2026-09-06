@@ -29,7 +29,9 @@ swift scripts/generate-app-icon.swift
 
 AppIntents は Team ID 付き署名が必要。無署名や adhoc だとウィジェットがプレースホルダのまま止まる。
 `.app` のファイル名は `Cursor使用量.app`（濁点なし）。実行ファイル名は ASCII の `AIUsageWidget` のまま。
-濁点付き日本語の `.app` 名は拡張が起動しない。
+濁点付き日本語の `.app` 名は拡張が起動しない。英語OS向けの表示名は `en.lproj/InfoPlist.strings` と
+ウィジェットの `Localizable.strings`。`WRAPPER_NAME` を英語に変えないこと（Finder のローカライズ条件と
+ギャラリーが見出しにファイル名を使う場合の日本語表示が壊れる）。
 
 ### 2. `CONFIGURATION_BUILD_DIR` を独自パスに上書きしないこと
 

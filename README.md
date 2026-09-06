@@ -55,7 +55,8 @@ swift scripts/generate-app-icon.swift
 AppIntents が解決できず、ウィジェットがプレースホルダのまま止まります。
 証明書が複数あるときは `DEVELOPMENT_TEAM=XXXXXXXXXX ./scripts/deploy-local.sh` です。
 
-配置後、「ウィジェットを編集」から **Cursor使用量** を追加してください。
+配置後、「ウィジェットを編集」から **Cursor使用量** を追加してください
+（英語のシステム言語では **Cursor Usage**）。
 常時使う場合は、システム設定 →「一般」→「ログイン項目」に登録しておくと便利です。
 
 ## 認証（Cursor）

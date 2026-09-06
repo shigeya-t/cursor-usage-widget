@@ -55,7 +55,8 @@ Ad-hoc signing breaks App Intents and leaves widgets stuck on placeholders.
 If you have multiple certificates, run
 `DEVELOPMENT_TEAM=XXXXXXXXXX ./scripts/deploy-local.sh`.
 
-After install, add **Cursor使用量** from Edit Widgets.
+After install, add **Cursor Usage** from Edit Widgets
+(Japanese system language: **Cursor使用量**).
 For everyday use, add it under System Settings → General → Login Items.
 
 ## Authentication (Cursor)
