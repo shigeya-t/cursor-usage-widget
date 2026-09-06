@@ -123,7 +123,7 @@ final class UsageModel: ObservableObject {
     var menuBarTitle: String {
         if isPaused { return L10n.string("menu.paused", language: language) }
         guard let snapshot else { return L10n.string("provider.cursor", language: language) }
-        let worst = snapshot.meters.map(\.percentUsed).max().map { Int($0.rounded()) } ?? 0
+        let worst = snapshot.meters.map(\.displayPercent).max() ?? 0
         return "\(worst)%"
     }
 
@@ -467,8 +467,8 @@ struct MeterRow: View {
     let language: AppLanguage
     var compact: Bool = false
 
-    private var percent: Int { Int(meter.percentUsed.rounded()) }
-    private var fraction: Double { min(max(meter.percentUsed / 100.0, 0), 1) }
+    private var percent: Int { meter.displayPercent }
+    private var fraction: Double { meter.barFraction }
 
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 2 : 4) {

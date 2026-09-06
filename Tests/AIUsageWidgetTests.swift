@@ -56,6 +56,17 @@ final class CursorProviderMappingTests: XCTestCase {
         XCTAssertNil(CursorProvider.parsePercent(from: nil))
     }
 
+    func testDisplayPercentMatchesDashboardSmallUsage() {
+        XCTAssertEqual(UsageFormatting.displayPercent(0), 0)
+        XCTAssertEqual(UsageFormatting.displayPercent(0.37), 1)
+        XCTAssertEqual(UsageFormatting.displayPercent(0.9), 1)
+        XCTAssertEqual(UsageFormatting.displayPercent(1.0), 1)
+        XCTAssertEqual(UsageFormatting.displayPercent(1.4), 1)
+        XCTAssertEqual(UsageFormatting.displayPercent(1.5), 2)
+        XCTAssertEqual(UsageFormatting.displayPercent(98.1), 98)
+        XCTAssertEqual(UsageFormatting.displayPercent(100), 100)
+    }
+
     private func decodeFixture(_ name: String) throws -> UsageSummaryResponse {
         let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: "json"))
         let data = try Data(contentsOf: url)
@@ -97,6 +108,7 @@ final class L10nTests: XCTestCase {
             "provider.cursor",
             "meter.cursorModels",
             "meter.otherModels",
+            "meter.grokBot",
             "spend.onDemand",
             "plan.reset.compact",
             "spend.amount.compact",
