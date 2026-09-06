@@ -33,7 +33,7 @@ final class UsageModel: ObservableObject {
             guard language != oldValue else { return }
             AppSettings.language = language
             AppSettings.notifyLanguageChanged()
-            WidgetCenter.shared.reloadAllTimelines()
+            WidgetReloader.reload()
             objectWillChange.send()
         }
     }
@@ -139,7 +139,7 @@ final class UsageModel: ObservableObject {
         timer = nil
         if propagate {
             AppSettings.isPaused = true
-            WidgetCenter.shared.reloadAllTimelines()
+            WidgetReloader.reload()
         }
     }
 
@@ -178,7 +178,7 @@ final class UsageModel: ObservableObject {
                 }
             }
         }
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetReloader.reload()
     }
 
     private func providersToRefresh() async -> [String] {

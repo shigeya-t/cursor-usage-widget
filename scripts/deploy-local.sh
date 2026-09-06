@@ -28,6 +28,9 @@ pkill -f "MacOS/AIUsageWidget$" 2>/dev/null || true
 pkill -f "AIUsageWidgetExtension" 2>/dev/null || true
 # 旧表示名の .app が残っていれば消す
 rm -rf "$DEST/AI使用量.app" 2>/dev/null || true
+# WidgetKit のプロセスが古い appex を掴んでいることがある
+killall AIUsageWidgetExtension 2>/dev/null || true
+killall chronod 2>/dev/null || true
 sleep 1
 
 echo "==> 配置: $TARGET"

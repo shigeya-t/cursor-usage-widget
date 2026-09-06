@@ -23,7 +23,7 @@ struct RefreshUsageIntent: AppIntent {
             AppSettings.noteNeededProvider(providerID)
         }
         AppSettings.notifyManualRefreshRequested()
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetReloader.reload()
         return .result()
     }
 }
@@ -41,7 +41,7 @@ struct TogglePauseIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         AppSettings.isPaused = !AppSettings.isPaused
         AppSettings.notifyPauseStateChanged()
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetReloader.reload()
         return .result()
     }
 }
