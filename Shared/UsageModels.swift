@@ -34,13 +34,22 @@ struct UsageMeter: Codable, Equatable, Identifiable {
     /// L10n キー（例: "meter.cursorModels"）
     var titleKey: String
     var subtitleKey: String?
-    /// 100 超も許容（オーバー使用）
+    /// 100 超も許容（オーバー使用）。API の生値（例: 0.37 = 0.37%）。
     var percentUsed: Double
     var accent: MeterAccent
 
     enum MeterAccent: String, Codable {
         case primary
         case secondary
+    }
+
+    /// ダッシュボード表示に寄せた整数％。0より大きく1未満は 1% に切り上げる。
+    var displayPercent: Int {
+        UsageFormatting.displayPercent(percentUsed)
+    }
+
+    var barFraction: Double {
+        min(max(percentUsed / 100.0, 0), 1)
     }
 }
 
@@ -71,5 +80,14 @@ enum AppLanguage: String, Codable, CaseIterable, Identifiable {
         case .ja: return "日本語"
         case .en: return "English"
         }
+    }
+}
+
+enum UsageFormatting {
+    /// Cursor ダッシュボードと同様、わずかな使用量も 0% に落とさず 1% と出す。
+    static func displayPercent(_ value: Double) -> Int {
+        if value <= 0 { return 0 }
+        if value < 1 { return 1 }
+        return Int(value.rounded())
     }
 }

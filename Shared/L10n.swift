@@ -32,6 +32,8 @@ enum L10n {
             .en: "Includes Cursor Grok and Composer"
         ],
         "meter.otherModels": [.ja: "Other Models", .en: "Other Models"],
+        "meter.grokBot": [.ja: "Grok Bot", .en: "Grok Bot"],
+        "meter.grokBot.subtitle": [.ja: "週次の利用枠", .en: "Weekly usage"],
         "meter.percentUsed": [.ja: "%d%% 使用", .en: "%d%% used"],
         "meter.cursorNote": [
             .ja: "上限を超えた追加使用は Other Models 枠またはオンデマンド課金に回ります。",

@@ -174,8 +174,8 @@ struct AIUsageWidgetEntryView: View {
     }
 
     private func meterBlock(_ meter: UsageMeter) -> some View {
-        let percent = Int(meter.percentUsed.rounded())
-        let fraction = min(max(meter.percentUsed / 100.0, 0), 1)
+        let percent = meter.displayPercent
+        let fraction = meter.barFraction
         return VStack(alignment: .leading, spacing: isSmall ? 1 : 2) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(L10n.string(meter.titleKey, language: lang))

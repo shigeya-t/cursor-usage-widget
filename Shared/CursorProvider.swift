@@ -25,7 +25,11 @@ struct CursorProvider: UsageProvider {
         if let me = try? await Self.fetchAuthMe(cookie: cookie) {
             account = me.email ?? me.name
         }
-        return Self.mapSummary(summary, accountLabel: account, fetchedAt: Date())
+        var snap = Self.mapSummary(summary, accountLabel: account, fetchedAt: Date())
+        if let grok = try? await Self.fetchGrokMeter(cookie: cookie) {
+            snap.meters.append(grok)
+        }
+        return snap
     }
 
     // MARK: - Network
@@ -67,6 +71,34 @@ struct CursorProvider: UsageProvider {
             throw CursorAPIError.unauthorized
         }
         return try JSONDecoder().decode(AuthMeResponse.self, from: data)
+    }
+
+    /// Grok Bot 週次枠。失敗・枠なしなら nil。
+    static func fetchGrokMeter(cookie: String) async throws -> UsageMeter? {
+        var request = URLRequest(url: URL(string: "https://cursor.com/api/dashboard/get-sand-usage-status")!)
+        request.httpMethod = "POST"
+        request.setValue("WorkosCursorSessionToken=\(cookie)", forHTTPHeaderField: "Cookie")
+        request.setValue("https://cursor.com", forHTTPHeaderField: "Origin")
+        request.setValue("https://cursor.com/dashboard?tab=usage", forHTTPHeaderField: "Referer")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpBody = Data("{}".utf8)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            return nil
+        }
+        let status = try JSONDecoder().decode(SandUsageStatusResponse.self, from: data)
+        guard let percent = status.usagePercent else { return nil }
+        // 枠ゼロのアカウントは出さない
+        if percent == 0, status.nextResetTimestampUtc == nil { return nil }
+        return UsageMeter(
+            id: "grok-bot",
+            titleKey: "meter.grokBot",
+            subtitleKey: "meter.grokBot.subtitle",
+            percentUsed: percent,
+            accent: .secondary
+        )
     }
 
     // MARK: - Mapping
@@ -255,6 +287,11 @@ struct AuthMeResponse: Codable {
     var name: String?
     var id: Int?
     var sub: String?
+}
+
+struct SandUsageStatusResponse: Codable, Equatable {
+    var usagePercent: Double?
+    var nextResetTimestampUtc: String?
 }
 
 private extension ISO8601DateFormatter {
