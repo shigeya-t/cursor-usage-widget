@@ -78,7 +78,7 @@ struct Provider: AppIntentTimelineProvider {
 }
 
 struct AIUsageWidget: Widget {
-    let kind = "AIUsageWidget"
+    let kind = WidgetKind.usage
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: SelectProviderIntent.self, provider: Provider()) { entry in

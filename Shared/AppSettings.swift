@@ -155,14 +155,63 @@ enum AppSettings {
         return URL(string: raw)
     }
 
+    /// App Group コンテナ。UserDefaults だけだと拡張側のキャッシュで古い値が残ることがある。
+    private static var containerURL: URL? {
+        guard isValidGroupID(appGroupID) else { return nil }
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+    }
+
+    private static func snapshotFileURL(providerID: String) -> URL? {
+        containerURL?
+            .appendingPathComponent("Library", isDirectory: true)
+            .appendingPathComponent("Application Support", isDirectory: true)
+            .appendingPathComponent("snapshots", isDirectory: true)
+            .appendingPathComponent("\(providerID).json", isDirectory: false)
+    }
+
+    private static let snapshotEncoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }()
+
+    private static let snapshotDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
+
     static func saveSnapshot(_ snapshot: UsageSnapshot) {
-        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        guard let data = try? snapshotEncoder.encode(snapshot) else { return }
+
+        if let fileURL = snapshotFileURL(providerID: snapshot.providerID) {
+            do {
+                try FileManager.default.createDirectory(
+                    at: fileURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
+                try data.write(to: fileURL, options: .atomic)
+            } catch {
+                usageLogger.error("snapshot file write failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+
         defaults.set(data, forKey: Keys.snapshot(snapshot.providerID))
         defaults.synchronize()
     }
 
     static func snapshot(providerID: String) -> UsageSnapshot? {
+        if let fileURL = snapshotFileURL(providerID: providerID),
+           let data = try? Data(contentsOf: fileURL),
+           let snap = try? snapshotDecoder.decode(UsageSnapshot.self, from: data)
+        {
+            return snap
+        }
+        // 旧形式（Date が reference interval）の UserDefaults も読む
         guard let data = defaults.data(forKey: Keys.snapshot(providerID)) else { return nil }
+        if let snap = try? snapshotDecoder.decode(UsageSnapshot.self, from: data) {
+            return snap
+        }
         return try? JSONDecoder().decode(UsageSnapshot.self, from: data)
     }
 
