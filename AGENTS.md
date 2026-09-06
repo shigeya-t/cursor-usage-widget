@@ -1,0 +1,74 @@
+# エージェント向けメモ
+
+利用者向けの説明は [README.md](README.md) / [README.en.md](README.en.md) を参照。
+ここにはビルド・署名・データ取得まわりの注意だけ書く。
+
+## 新規クローン直後のセットアップ
+
+`AIUsageWidget.xcodeproj` / `Info.plist` / `*.entitlements` は `project.yml` から生成され、
+`.gitignore` によりリポジトリに含まれていない。**クローン直後や `project.yml` を編集した後は
+`xcodegen generate` が必要**（`brew install xcodegen`）。
+
+```sh
+cp Config/Team.xcconfig.example Config/Team.xcconfig
+./scripts/sync-team.sh
+xcodegen generate
+swift scripts/generate-app-icon.swift
+./scripts/test.sh
+./scripts/deploy-local.sh
+```
+
+`xcodegen generate` の前に **必ず `Config/Team.xcconfig` を用意して `./scripts/sync-team.sh`** する。
+証明書から Team ID を書き、`DEVELOPMENT_TEAM` をビルドに乗せる。
+これを忘れると App Group が `.jp.shigeya.AIUsageWidget` になり、App Intents の
+エラーとウィジェット設定の不具合が同時に出る。
+
+## ビルドについて（重要）
+
+### 1. 必ず署名付きでビルドすること
+
+AppIntents は Team ID 付き署名が必要。無署名や adhoc だとウィジェットがプレースホルダのまま止まる。
+`.app` のファイル名は `Cursor使用量.app`（濁点なし）。実行ファイル名は ASCII の `AIUsageWidget` のまま。
+濁点付き日本語の `.app` 名は拡張が起動しない。
+
+### 2. `CONFIGURATION_BUILD_DIR` を独自パスに上書きしないこと
+
+標準の DerivedData にビルドし、配置は `scripts/deploy-local.sh` に任せる。同スクリプトは
+完成した `.app` を `build/Cursor使用量.app` にもコピーする（`build/` は gitignore）。
+
+Team ID は手元の「Apple Development」証明書の OU から引く。複数あるときは
+`DEVELOPMENT_TEAM=XXXXXXXXXX ./scripts/deploy-local.sh`。
+
+## テスト
+
+`AIUsageWidgetTests` はホストアプリを立てない単体テスト。通信せず、原則 UserDefaults /
+Keychain も本番経路では触らない（Cookie 正規化と JSON マッピングの純関数を検証する）。
+
+- `CursorProviderMappingTests` — `Tests/Fixtures/` の usage-summary JSON
+- `CursorSessionTests` — Cookie / JWT の正規化
+- `L10nTests` — 日本語 / English キー
+
+## データソース
+
+取得は `Shared/CursorProvider.swift` に集約する。エンドポイントは
+`GET https://cursor.com/api/usage-summary`（非公式）。認証は
+`WorkosCursorSessionToken` Cookie。
+
+ホストは `LSUIElement` のメニューバー常駐。サンドボックスあり。App Group は Team ID 付き。
+Cursor の `Application Support` は temporary-exception で read-only。
+
+ウィジェット拡張の `Provider.buildEntry()` から通信してはいけない。スナップショットは
+App が App Group に書いたものを読むだけ。
+
+## 開発中に踏まないこと（subway-widget と同じ）
+
+- `.app` 名に濁点付き日本語を入れない（拡張が起動せず空枠になる）
+- アプリ終了は bundle ID（`tell application id "jp.shigeya.AIUsageWidget"`）
+- `MenuBarExtra(.window)` は `NSApp.activate` しないと TextField が入力を受け取れない
+- Cookie / JWT をログに出さない
+
+## ログ
+
+```sh
+log stream --predicate 'subsystem beginswith "jp.shigeya.AIUsageWidget"' --level debug
+```

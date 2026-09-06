@@ -1,0 +1,21 @@
+{
+  "billingCycleStart": "2026-08-01T00:00:00.000Z",
+  "billingCycleEnd": "2026-09-01T00:00:00.000Z",
+  "membershipType": "ultra",
+  "limitType": "user",
+  "isUnlimited": false,
+  "individualUsage": {
+    "plan": {
+      "enabled": true,
+      "autoPercentUsed": 12.4,
+      "apiPercentUsed": 3.1,
+      "totalPercentUsed": 10.2
+    },
+    "onDemand": {
+      "enabled": true,
+      "used": 850,
+      "limit": null,
+      "remaining": null
+    }
+  }
+}
